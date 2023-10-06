@@ -1,5 +1,4 @@
 from ultralytics import YOLO
-import asyncio
 
 
 class Recommended:
