@@ -1,0 +1,30 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: 64.225.104.9
+        key: ${{ secrets.SSH_KEY }}
+        username: root
+        script: |
+              cd app
+              git remote add origin git@github.com:Cut-it-Business/recommendation_engine.git
+              git pull origin main
+              git checkout main -f
+              git branch --set-upstream-to origin/main
+              docker compose down
+              docker compose build
+              docker compose up -d
