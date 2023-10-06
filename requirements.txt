@@ -1,0 +1,14 @@
+sqlalchemy
+numpy
+pandas
+fastapi
+gunicorn
+uvicorn
+aiomysql
+pymysql
+tqdm
+asyncpg
+schedule
+requests
+psycopg2-binary
+lxml
