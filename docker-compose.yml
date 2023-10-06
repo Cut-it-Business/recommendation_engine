@@ -5,66 +5,18 @@ services:
     build:
       context: ./
     image: async-few-threads-microservice
-    container_name: async-few-threads-microservice
+    container_name: async-recommendation
     networks:
       - my_network
     restart: unless-stopped
     ports:
       - "8000:8000"
-    command: uvicorn main_app:app --host 0.0.0.0 --port 8000
-
-   #uvicorn main_app:app --workers 3
-   #gunicorn --workers=3 -b 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker main_app:app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
 
-
- parser:
-    build:
-      context: ./
-    image: async-few-threads-microservice
-    container_name: parser
-    ports:
-      - 8001:8000
-    networks:
-      - my_network
-    restart: unless-stopped
-    command: python schedule_file.py
-
-   #uvicorn main_app:app --workers 3
-   #gunicorn --workers=3 -b 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker main_app:app
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-
- postgres:
-   image: 'postgres:15'
-   container_name: postgress_db
-   networks:
-     - my_network
-   ports:
-    - 5434:5432
-
-   environment:
-      POSTGRES_USER: maldivus # The PostgreSQL user (useful to connect to the database)
-      POSTGRES_PASSWORD: maldivus123 # The PostgreSQL password (useful to connect to the database)
-      POSTGRES_DB: maldivus #
-   command: postgres -c 'max_connections=1000'
-   volumes:
-     - pgdata:/var/lib/postgresql/data
-
-   healthcheck:
-     test: [ "CMD-SHELL", "pg_isready -U maldivus -d maldivus" ]
-     interval: 10s
-     timeout: 5s
-     retries: 5
-   restart: on-failure
-
-volumes:
-  pgdata:
 
 networks:
   my_network:
