@@ -1,3 +1,6 @@
+from typing import List
+
+import uvicorn
 from fastapi import File, UploadFile, FastAPI, Depends
 from stages.model import Recommended
 import asyncio
@@ -16,6 +19,8 @@ context = AppContext()
 
 
 def blocking_operation(partners):
+    if type(partners) == list:
+        return context.model.batch_recommended(partners)
     d = context.model.recommended(partners)
     return d
 
@@ -36,3 +41,20 @@ async def upload(file: UploadFile = File(...)):
         file.file.close()
 
     return response
+
+
+@app.post('/batch_upload')
+async def batch_upload(files: List[UploadFile] = File(...)):
+    try:
+        images_data = [await file.read() for file in files]
+        contents = [Image.open(io.BytesIO(image_data)) for image_data in images_data]
+        response = await run_blocking_operation(contents)
+    except Exception as e:
+        return {"Exception": e}
+    finally:
+        [file.file.close() for file in files]
+
+    return response
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8002)
