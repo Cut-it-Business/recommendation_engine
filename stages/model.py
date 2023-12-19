@@ -1,3 +1,5 @@
+from typing import List
+
 from ultralytics import YOLO
 
 
@@ -13,3 +15,12 @@ class Recommended:
         probs = [round(x, 5) for x in res[0].probs.data[probs_ind].tolist()]
         response = dict(zip([state[i] for i in probs_ind], probs))
         return response
+
+    def batch_recommended(self, images: List):
+        res = self.model.predict(images)
+        probs_ind = res[0].probs.data.argsort().tolist()[::-1]
+        state = res[0].names
+        probs = [round(x, 5) for x in res[0].probs.data[probs_ind].tolist()]
+        response = dict(zip([state[i] for i in probs_ind], probs))
+        return response
+
