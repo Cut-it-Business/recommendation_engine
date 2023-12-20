@@ -1,7 +1,12 @@
-from typing import List
+import os
+import random
+
+from typing import List, Literal
 
 import uvicorn
-from fastapi import File, UploadFile, FastAPI, Depends
+from fastapi import File, UploadFile, FastAPI, Request, HTTPException
+from fastapi.staticfiles import StaticFiles
+
 from stages.model import Recommended
 import asyncio
 from functools import partial
@@ -11,9 +16,13 @@ import io
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
 class AppContext:
     def __init__(self):
         self.model = Recommended('model/best.pt')
+
 
 context = AppContext()
 
@@ -23,6 +32,7 @@ def blocking_operation(partners):
         return context.model.batch_recommended(partners)
     d = context.model.recommended(partners)
     return d
+
 
 async def run_blocking_operation(partners):
     loop = asyncio.get_event_loop()
@@ -55,3 +65,23 @@ async def batch_upload(files: List[UploadFile] = File(...)):
         [file.file.close() for file in files]
 
     return response
+
+
+@app.get('/images')
+async def images(request: Request, gender: Literal['male', 'female']):
+    image_links = set()
+
+    def RandomImg(gender):
+        """
+        Returns a random image, chosen among the files of the given path.
+        """
+        files = os.listdir('static/' + gender)
+
+        index = random.randrange(0, len(files))
+        return files[index]
+
+    while len(image_links) < 9:
+        img = RandomImg(gender)
+        img_url = request.url_for('static', path=f'{gender}/{img}')
+        image_links.add(str(img_url))
+    return image_links
