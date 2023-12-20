@@ -68,20 +68,28 @@ async def batch_upload(files: List[UploadFile] = File(...)):
 
 
 @app.get('/images')
-async def images(request: Request, gender: Literal['male', 'female']):
+async def images(request: Request, gender: Literal['male', 'female'] = None):
     image_links = set()
 
-    def RandomImg(gender):
+    def random_img(gender_type):
         """
         Returns a random image, chosen among the files of the given path.
         """
-        files = os.listdir('static/' + gender)
+        files = os.listdir('static/' + gender_type)
 
         index = random.randrange(0, len(files))
         return files[index]
 
     while len(image_links) < 9:
-        img = RandomImg(gender)
+        if gender is None:
+            random_gender = random.choice(['male', 'female'])
+            img = random_img(random_gender)
+            img_url = request.url_for('static', path=f'{random_gender}/{img}')
+            image_links.add(str(img_url))
+            continue
+
+        img = random_img(gender)
         img_url = request.url_for('static', path=f'{gender}/{img}')
         image_links.add(str(img_url))
+
     return image_links
