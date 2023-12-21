@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 class AppContext:
     def __init__(self):
-        self.model = Recommended('model/best.pt')
+        self.model = Recommended('model/clip_emb_logreg.pickle', 'model/sorted_classes.pkl')
 
 
 context = AppContext()
