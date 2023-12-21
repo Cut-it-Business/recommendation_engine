@@ -10,7 +10,7 @@ target_path ='../model/sorted_classes.pkl'
 clsf_path = '../model/clip_emb_logreg.pickle'
 
 class Recommended:
-    def __init__(self, clsf_path):
+    def __init__(self, clsf_path,target_path):
         self.classifier = pickle.load(open(clsf_path, 'rb'))
         self.target = pickle.load(open(target_path, 'rb'))
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -22,7 +22,7 @@ class Recommended:
         '''
         image: jpeg file?
         '''
-        image = Image.open(io.BytesIO(image)) # image = Image.open(image) #???
+        # image = Image.open(io.BytesIO(image)) # image = Image.open(image) #???
         image_input = self.preprocess(image).unsqueeze(0).to(self.device)
         image_features = self.clip_model.encode_image(image_input)
         outputs = self.classifier.predict_proba(image_features.detach().numpy())
@@ -36,7 +36,7 @@ class Recommended:
         '''
         images: List of jpeg files?
         '''
-        images = [Image.open(io.BytesIO(img)) for img in images] #???
+        # images = [Image.open(io.BytesIO(img)) for img in images] #???
 
         image_feature_list = [self.clip_model.encode_image(self.preprocess(img).unsqueeze(0).to(self.device)) for img in images]
         outputs_list = [self.classifier.predict_proba(img_ftr.detach().numpy()) for img_ftr in image_feature_list]
